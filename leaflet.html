@@ -22,7 +22,7 @@
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>'
         }).addTo(map);
 
-        L.tileLayer.wms("http://localhost:8001/coads.nc.wms?SERVICE=WMS&", {
+        L.tileLayer.wms("http://localhost:5000/", {
             layers: 'SLP',
             format: 'image/png',
             transparent: true,
