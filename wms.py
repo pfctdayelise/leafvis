@@ -1,4 +1,6 @@
 from flask import Flask, request
+from flask import Flask, request, json, jsonify, current_app, render_template
+from functools import wraps
 
 import numpy as np
 import StringIO
@@ -6,29 +8,76 @@ import StringIO
 from pyproj import Proj
 from joblib import Memory
 
+from pyresample import geometry, image
+
+import sys
+sys.path.append('/work/nfaggian/GIT-Mirrors/metex')
+
+from metex import data
+
+
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 import mpl_toolkits.basemap
 
+def support_jsonp(f):
+    """Wraps JSONified output for JSONP"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        callback = request.args.get('callback', False)
+        if callback:
+            content = str(callback) + '(' + str(f(*args,**kwargs).data) + ')'
+            return current_app.response_class(content, mimetype='application/javascript')
+        else:
+            return f(*args, **kwargs)
+    return decorated_function
+
+
 # FIXME: Look at PyResample!
-
-
 app = Flask(__name__)
 
 mem = Memory(cachedir='/tmp/joblib')
 
 import matplotlib.pyplot as plt
 
-fig, ax0 = plt.subplots(1, 1, figsize=(10, 10))
+lats, lons = data.coords()
+topo = data.topo()
 
 proj = Proj(init='epsg:3857')
 
-def draw_tile(box):
+def resample(tl, br):
+    
+   
+    model_grid = geometry.GridDefinition(lats=lats, lons=lons)
+    
+    alons = np.linspace(tl[0], br[0], 256)
+    alats = np.linspace(tl[1], br[1], 256)
+    Alats = np.tile(alats, (alons.size, 1)).T
+    Alons = np.tile(alons, (alats.size, 1))
+
+    analysis_grid = geometry.GridDefinition(lats=Alats, lons=Alons)
+    resampler = image.ImageContainerNearest(
+        topo, 
+        model_grid, 
+        radius_of_influence=50000, 
+        reduce_data=True
+        )
+
+    grid = np.flipud(resampler.resample(analysis_grid).image_data)
+
+    grid[grid == 0] = np.nan
+
+    return grid
+
+def draw_tile(tl, br):
+
+    grid = resample(tl, br)
+
     fig = Figure(dpi=80, edgecolor='none')
-    fig.patch.set_alpha(0.5)
-    ax = fig.add_subplot(111)
-    ax.imshow(np.random.rand(256, 256), interpolation='nearest')
+    fig.patch.set_alpha(0.1)
+    ax = fig.add_axes((0,0,1,1))
+    ax.matshow(grid, interpolation='nearest', alpha=0.5, vmin=0, vmax=2500)
     ax.axis('off')
     ax.axis('tight')
     canvas = FigureCanvas(fig)
@@ -45,11 +94,21 @@ def wms():
  
     coords = [float(x) for x in request.args['bbox'].split(',')]
     tl = proj(coords[0], coords[1], inverse=True)
-    br = proj(coords[1], coords[2], inverse=True)
+    br = proj(coords[2], coords[3], inverse=True)
 
     print '{0}\ntl={1},br={2}\n{0}'.format('*'*80, tl, br)
 
-    return draw_tile(coords)
+    return cachedDraw(tl, br)
+
+
+@app.route('/sample/<location>')
+@support_jsonp
+def SAMPLER(location):
+    """
+    """
+    return jsonify(value='bah')
+
+
 
 if __name__ == '__main__': 
     plt.ioff()
