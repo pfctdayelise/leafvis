@@ -108,7 +108,11 @@ def SAMPLER(location):
     """
     return jsonify(value='bah')
 
+from flask import render_template
 
+@app.route('/map')
+def hello():
+    return render_template('leaflet.html')
 
 if __name__ == '__main__': 
     plt.ioff()
