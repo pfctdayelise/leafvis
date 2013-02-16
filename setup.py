@@ -1,24 +1,20 @@
 #! /usr/bin/env python
 
-""" imreg package configuration """
-import numpy
-import imreg
+""" leafvis package configuration """
 
 from setuptools import setup, find_packages
-from distutils.extension import Extension
-from Cython.Distutils import build_ext
 
-DISTNAME = 'imreg'
-DESCRIPTION = 'Image registration toolkit'
+DISTNAME = 'leafvis'
+DESCRIPTION = 'Image Visualization (using Leaflet.js)'
 LONG_DESCRIPTION = """
-"imreg" is an image registration package for python that makes it easy to
-automatically align image data.
+A python based layer visualization library that leverages off the excellent 
+map visualization tool, leaflet.js.
 """
-MAINTAINER = 'Nathan Faggian, Riaan Van Den Dool, Stefan Van Der Walt'
+MAINTAINER = 'Nathan Faggian'
 MAINTAINER_EMAIL = 'nathan.faggian@gmail.com'
-URL = 'pyimreg.github.com'
+URL = 'https://github.com/nfaggian/leafvis'
 LICENSE = 'Apache License (2.0)'
-DOWNLOAD_URL = ''
+DOWNLOAD_URL = 'https://github.com/nfaggian/leafvis.git'
 
 VERSION = imreg.__version__
 
@@ -43,15 +39,13 @@ setup(
     version=VERSION,
     classifiers=CLASSIFIERS,
     packages=find_packages(),
-    cmdclass={
-            'build_ext': build_ext
-        },
-    ext_modules=[Extension("imreg.interpolation", ["imreg/_interpolation.pyx"], )],
-    include_dirs=[numpy.get_include(), ],
     package_data={},
     install_requires=[
+       'flask',
        'numpy',
-       'scipy'
+       'joblib',
+       'pyproj',
+       'pyresample'
        ],
     zip_safe=False
     )
