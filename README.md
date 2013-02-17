@@ -48,7 +48,7 @@ To install for all users on Unix/Linux:
 Examples
 --------
 
-Refer to ``/notebooks``.
+Refer to ``/notebooks/example.ipynb``.
 
 Development
 -----------
