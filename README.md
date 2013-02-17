@@ -1,7 +1,7 @@
 Leaflet based visualization framework
 =====================================
 
-This package makes it possible to easily visualize gridded meteorological data (**or** large images) using the *excellent* javascript visualization library leaflet.
+This package makes it possible to easily visualize gridded meteorological data, represented as numpy arrays, using the *excellent* javascript visualization library leaflet.
 
 References:
 -----------
