@@ -8,8 +8,6 @@ import StringIO
 from pyproj import Proj
 from joblib import Memory
 
-from pyresample import geometry, image
-
 import sys
 sys.path.append('/Users/nfaggian/Desktop/development/metex')
 
@@ -46,46 +44,6 @@ topo = data.topo()
 
 proj = Proj(init='epsg:3857')
 
-def resample(tl, br):
-    
-   
-    model_grid = geometry.GridDefinition(lats=lats, lons=lons)
-    
-    alons = np.linspace(tl[0], br[0], 256)
-    alats = np.linspace(tl[1], br[1], 256)
-    Alats = np.tile(alats, (alons.size, 1)).T
-    Alons = np.tile(alons, (alats.size, 1))
-
-    analysis_grid = geometry.GridDefinition(lats=Alats, lons=Alons)
-    resampler = image.ImageContainerNearest(
-        topo, 
-        model_grid, 
-        radius_of_influence=50000, 
-        reduce_data=True
-        )
-
-    grid = np.flipud(resampler.resample(analysis_grid).image_data)
-
-    grid[grid == 0] = np.nan
-
-    return grid
-
-def draw_tile(tl, br):
-
-    grid = resample(tl, br)
-
-    fig = Figure(dpi=80, edgecolor='none')
-    fig.patch.set_alpha(0.1)
-    ax = fig.add_axes((0,0,1,1))
-    ax.matshow(grid, interpolation='nearest', alpha=0.5, vmin=0, vmax=2500)
-    ax.contour(grid, level=[500])
-    ax.axis('off')
-    ax.axis('tight')
-    canvas = FigureCanvas(fig)
-    png_output = StringIO.StringIO()
-    canvas.print_png(png_output, transparent=True)
-    
-    return png_output.getvalue()
 
 
 cachedDraw = mem.cache(draw_tile)
