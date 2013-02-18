@@ -4,26 +4,32 @@ Resampling functions that map grids to tiles.
 
 from pyresample import geometry, image
 
-def resample(tl, br):
-    
-   
-    model_grid = geometry.GridDefinition(lats=lats, lons=lons)
-    
-    alons = np.linspace(tl[0], br[0], 256)
-    alats = np.linspace(tl[1], br[1], 256)
-    Alats = np.tile(alats, (alons.size, 1)).T
-    Alons = np.tile(alons, (alats.size, 1))
+def resample((lats, lons, values), tl, br, samples=256):
+    """
+    Returns a grid, which is resampled.
+    """
 
-    analysis_grid = geometry.GridDefinition(lats=Alats, lons=Alons)
+    data_grid = geometry.GridDefinition(lats=lats, lons=lons)
+    
+    # Form the coordinates for resampling
+    rlons = np.linspace(tl[0], br[0], 256)
+    rlats = np.linspace(tl[1], br[1], 256)
+
+    resample_grid = geometry.GridDefinition(
+        lats=np.tile(rlats, (rlons.size, 1)).T, 
+        lons=np.tile(rlons, (rlats.size, 1))
+        )
+
+    # Build a resampler.
     resampler = image.ImageContainerNearest(
-        topo, 
-        model_grid, 
+        values, 
+        data_grid, 
         radius_of_influence=50000, 
         reduce_data=True
         )
 
-    grid = np.flipud(resampler.resample(analysis_grid).image_data)
-
+    # Form the appropriate grid.
+    grid = np.flipud(resampler.resample(resample_grid).image_data)
     grid[grid == 0] = np.nan
 
     return grid

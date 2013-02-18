@@ -2,6 +2,8 @@
 
 """ leafvis package configuration """
 
+import leafvis
+
 from setuptools import setup, find_packages
 
 DISTNAME = 'leafvis'
@@ -16,7 +18,7 @@ URL = 'https://github.com/nfaggian/leafvis'
 LICENSE = 'Apache License (2.0)'
 DOWNLOAD_URL = 'https://github.com/nfaggian/leafvis.git'
 
-VERSION = imreg.__version__
+VERSION = leafvis.__version__
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
