@@ -7,7 +7,7 @@ import tables
 
 import numpy as np
 
-# Store the grids 
+# Data store for raw grids 
 table = tables.openFile('/tmp/grids.hdf5', 'a')
 
 def store_grid(lats, lons, values):

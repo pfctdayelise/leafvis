@@ -12,7 +12,8 @@ def draw_tile(grid, cmap='gray', dpi=80, alpha=0.5, vim=0, vmax=2500):
     """ Draws a tile """
 
     fig = Figure(dpi=dpi, edgecolor='none')
-    
+    fig.patch.set_alpha(0.0)
+
     # Form the graphic
     ax = fig.add_axes((0,0,1,1))
     ax.matshow(grid, interpolation='nearest', alpha=alpha)

@@ -1,7 +1,7 @@
 """
 Resampling functions that map grids to tiles.
 """
-
+import numpy as np
 from pyresample import geometry, image
 
 def resample((lats, lons, values), tl, br, samples=256):

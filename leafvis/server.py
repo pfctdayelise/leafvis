@@ -1,13 +1,23 @@
-from flask import Flask, request, render_template
-from pyproj import Proj
 
 import pickle
-
 import store
 import sampler
 import render
 
+from flask import Flask, request, render_template
+from pyproj import Proj
+from joblib import Memory
+
+memory = Memory(cachedir='/tmp/joblib', verbose=False)
+
 app = Flask(__name__)
+
+
+@memory.cache
+def __drawLayerTile(layer_data, tl, br):
+    grid = sampler.resample(layer_data, tl, br, samples=256)
+    return render.draw_tile(grid)
+
 
 @app.route('/', methods=['GET'])
 def wms():
@@ -29,11 +39,7 @@ def wms():
     if layer_data is None:
         return ''
 
-    # Sample the layer appropriately.
-    grid = sampler.resample(layer_data, tl, br, samples=256)
-
-    # Draw layer
-    return render.draw_tile(grid)
+    return __drawLayerTile(layer_data, tl, br)  
 
 @app.route('/', methods=['PUT'])
 def upload():
@@ -47,4 +53,4 @@ def draw(layer):
     return render_template('leaflet.html', layer=layer)
 
 if __name__ == '__main__': 
-      app.run(debug=True)   
+      app.run(debug=False)   
