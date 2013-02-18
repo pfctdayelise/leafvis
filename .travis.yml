@@ -17,6 +17,7 @@ install:
     - sudo apt-get install $PYTHON-scipy
     - sudo apt-get install $PYTHON-matplotlib
     - sudo apt-get install $PYTHON-setuptools
+    - sudo apt-get install $PYTHON-tables
     - sudo pip-$PYVER install cython
     - sudo pip-$PYVER install pytest
     - sudo $PYTHON setup.py install
