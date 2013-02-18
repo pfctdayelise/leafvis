@@ -41,4 +41,4 @@ def retrieve_grid(grid_id):
         node = table.getNode('/grids/{}'.format(grid_id))
     except tables.NoSuchNodeError as error:
         return None
-    return (node.lats[:, :], node.lons[:, :], node.values[:, :])
+    return (node.lats, node.lons, node.values)

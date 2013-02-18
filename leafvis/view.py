@@ -1,7 +1,9 @@
-""" Defines a leafvis view """
+""" Defines a leafvis view for IPython """
 
 import requests
 import pickle
+from IPython.display import HTML
+
 
 def upload_data((lats, lons, values), host="http://localhost:5000/"):
     """ Uploads the layer data onto the WMS datastore """
@@ -10,6 +12,17 @@ def upload_data((lats, lons, values), host="http://localhost:5000/"):
     r = requests.put(host, params=payload)
     return r.content
 
-#import numpy as np
-#foo = np.zeros((100,100))
-#upload_data((foo, foo, foo))
+
+def leaflet(lats, lons, data):
+    """ Returns a HTML leaflet view """
+
+    mapID = upload_data((lats, lons, data))
+
+    url = ('<iframe '
+           ' src=http://localhost:5000/map/{}'
+           ' width=850'
+           ' height=650'
+           '</iframe>'
+          ).format(mapID)
+    
+    return HTML(url)
