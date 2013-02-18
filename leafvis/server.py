@@ -12,7 +12,6 @@ memory = Memory(cachedir='/tmp/joblib', verbose=False)
 
 app = Flask(__name__)
 
-
 @memory.cache
 def __drawLayerTile(layer_data, tl, br):
     grid = sampler.resample(layer_data, tl, br, samples=256)
@@ -53,4 +52,4 @@ def draw(layer):
     return render_template('leaflet.html', layer=layer)
 
 if __name__ == '__main__': 
-      app.run(debug=False)   
+      app.run(debug=True)   
