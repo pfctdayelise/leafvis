@@ -47,7 +47,8 @@ setup(
        'numpy',
        'joblib',
        'pyproj',
-       'pyresample'
+       'pyresample',
+       'tables'
        ],
     zip_safe=False
     )
