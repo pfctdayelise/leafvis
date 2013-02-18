@@ -37,6 +37,8 @@ def store_grid(lats, lons, values):
 
 def retrieve_grid(grid_id):
     """ Retrieve a grid from the grid database """
-    node = table.getNode('/grids/{}'.format(grid_id))
-    if node is not None:
-        return (node.lats[:, :], node.lons[:, :], node.values[:, :])
+    try:
+        node = table.getNode('/grids/{}'.format(grid_id))
+    except tables.NoSuchNodeError as error:
+        return None
+    return (node.lats[:, :], node.lons[:, :], node.values[:, :])

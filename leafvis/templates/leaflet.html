@@ -21,7 +21,7 @@
             });
 
         var wmsLayer = L.tileLayer.wms("http://localhost:5000/", {
-            layers: 'SLP',
+            layers: '{{ layer }}',
             format: 'image/png',
             transparent: true,
             });
@@ -60,7 +60,7 @@
         };
 
         var overlays = {
-            "Topography": wmsLayer
+            "{{ layer }}": wmsLayer
         };
 
         L.control.layers(baseLayers, overlays).addTo(map);
