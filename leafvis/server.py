@@ -8,9 +8,13 @@ from flask import Flask, request, render_template
 from pyproj import Proj
 from joblib import Memory
 
-memory = Memory(cachedir='/tmp/joblib', verbose=False)
+from tornado.wsgi import WSGIContainer
+from tornado.httpserver import HTTPServer
+from tornado.ioloop import IOLoop
 
 app = Flask(__name__)
+
+memory = Memory(cachedir='/tmp/joblib', verbose=False)
 
 @memory.cache
 def __drawLayerTile(layer_data, tl, br):
@@ -52,4 +56,6 @@ def draw(layer):
     return render_template('leaflet.html', layer=layer)
 
 if __name__ == '__main__': 
-      app.run(debug=True)   
+    http_server = HTTPServer(WSGIContainer(app))
+    http_server.listen(5000)
+    IOLoop.instance().start()
