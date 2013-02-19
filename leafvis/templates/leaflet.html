@@ -29,7 +29,8 @@
         var map = L.map('map', {
             center: new L.LatLng(-37.7833, 144.9667),
             zoom: 10,
-            layers: [baseMap, wmsLayer]
+            layers: [baseMap, wmsLayer],
+            crs: L.CRS.EPSG3857
             });
 
         var popup = L.popup();
