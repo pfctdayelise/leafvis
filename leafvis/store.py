@@ -4,12 +4,14 @@ Basic datastore built ontop of pytables using a simple mapping object
 import os
 import uuid
 import tables
-
+import collections
 import numpy as np
 
 GRID_LOCATION = '/tmp/leafvis_grids'
 
 BLOSC = tables.Filters(complib='blosc', complevel=5)
+
+GridSample = collections.namedtuple('GridSample', 'name lats lons values')
 
 ################################################################################
 # TODO: 
@@ -41,7 +43,7 @@ def create_wms_layer(name, lats, lons, values):
     return str(grid_id)
 
 
-class tableStore(object):
+class DataStore(object):
     """ Container class for layers """
 
     def __init__(self):
@@ -63,24 +65,21 @@ class tableStore(object):
             table = tables.openFile(filename, 'a')
             self.cache[name] = table
 
-    def __getitem__(self, key):
+    def get_layer(self, grid_id):
         """
         Retrieve a grid from the grid database
         """
-        table = self.cache.get(key)
+        table = self.cache.get(grid_id)
         if table is not None:
             node = table.getNode('/grids/{}'.format(grid_id))
         except tables.NoSuchNodeError as error:
             return None
-        return (node.lats[:,:], node.lons[:,:], node.values[:,:])
+
+        return GridSample(node.name, node.lats[:,:], node.lons[:,:], node.values[:,:])
 
     # FIXME: Caching png data?
-    def getGrid():
+    def get_png(self, grid_id, bounding_box):
         pass
-
-    def getPng():
-        pass
-
 
 ################################################################################
 # FIXME: Delete code below
