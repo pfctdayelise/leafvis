@@ -17,6 +17,7 @@ def draw_tile(grid, cmap='gray', dpi=80, alpha=0.5, vmin=0, vmax=2500):
     # Form the graphic
     ax = fig.add_axes((0,0,1,1))
     ax.matshow(grid, interpolation='nearest', alpha=alpha, vmin=vmin, vmax=vmax)
+    ax.contour(grid, level=[500])
     ax.axis('off')
     ax.axis('tight')
 
