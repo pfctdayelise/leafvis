@@ -1,6 +1,8 @@
 """
 Basic datastore built ontop of pytables using a simple mapping object
 """
+
+import glob
 import os
 import uuid
 import tables
@@ -11,7 +13,7 @@ GRID_LOCATION = '/tmp/leafvis_grids'
 
 BLOSC = tables.Filters(complib='blosc', complevel=5)
 
-GridSample = collections.namedtuple('GridSample', 'name lats lons values')
+Layer = collections.namedtuple('Layer', 'name lats lons values')
 
 ################################################################################
 # TODO: 
@@ -21,12 +23,14 @@ GridSample = collections.namedtuple('GridSample', 'name lats lons values')
 
 def create_wms_layer(name, lats, lons, values):
     """ Create a wms layer """
-    table = tables.openFile('{}/{}.hdf5'.format(GRID_LOCATION, name), 'w')
+
+    grid_id = str(uuid.uuid4())
+
+    table = tables.openFile('{}/{}.hdf5'.format(GRID_LOCATION, grid_id), 'w')
     
     # Form a unique grid entry
     root = table.createGroup("/", 'grids', 'grid data')
 
-    grid_id = uuid.uuid4()
     grid_root = table.createGroup(root, str(grid_id), "grid_id")
 
     # For each entry form the table data.
@@ -38,21 +42,32 @@ def create_wms_layer(name, lats, lons, values):
             data.shape, 
             filters=BLOSC)
         entry[:] = data
+
+    grid_root._v_attrs.name = name 
+
     table.close()
 
-    return str(grid_id)
+    return grid_id
 
 
 class DataStore(object):
     """ Container class for layers """
 
     def __init__(self):
-        # Define the cache for {layer-name : table handles}
+        # Define the cache for {grid_id : table}
+        
+        self.map = {}
         self.cache = {}
 
     def __del__(self):
+        
+        # Close all open files.
         for _name, table in self.cache.items():
             table.close()
+
+        # Delete temporary files.
+        for filename in glob.glob('{}/*.hdf5'.format(GRID_LOCATION)):
+            os.unlink(filename)
 
     def update(self):
         """ Refresh the table cache """
@@ -61,21 +76,42 @@ class DataStore(object):
             value.close()
 
         # Loop through all files in the GRID_LOCATION
-        for filename in glob.glob('{}/*.hdf5'):
+        for filename in glob.glob('{}/*.hdf5'.format(GRID_LOCATION)):
+            # Open a file handle
             table = tables.openFile(filename, 'a')
-            self.cache[name] = table
 
-    def get_layer(self, grid_id):
+            # Populate the cache
+            grid_id = table.listNodes('/grids')[0]._v_name
+            name = table.listNodes('/grids')[0]._v_attrs.name
+            
+            print "{} : {}".format(name, grid_id)
+
+            self.cache[grid_id] = table
+            self.map[name] = grid_id
+
+
+    def get_layer(self, name):
         """
         Retrieve a grid from the grid database
         """
-        table = self.cache.get(grid_id)
-        if table is not None:
-            try:
-               node = table.getNode('/grids/{}'.format(grid_id))
-            except tables.NoSuchNodeError as error:
-                return None
-            return GridSample(node.name, node.lats[:,:], node.lons[:,:], node.values[:,:])
+
+        grid_id = self.map.get(name)
+
+        if grid_id is not None:
+
+            table = self.cache.get(grid_id)
+
+            if table is not None:
+                try:
+                   node = table.getNode('/grids/{}'.format(grid_id))
+                except tables.NoSuchNodeError as error:
+                    return None
+                return Layer(
+                    node._v_attrs.name, 
+                    node.lats.read(), 
+                    node.lons.read(), 
+                    node.values.read()
+                    )
 
     # FIXME: Caching png data?
     def get_png(self, grid_id, bounding_box):
