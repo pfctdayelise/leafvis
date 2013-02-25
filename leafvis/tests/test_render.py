@@ -57,6 +57,6 @@ def test_draw_tile():
 
     grid = np.zeros((10,10))
 
-    fileString = render.draw_tile(grid, cmap='gray', dpi=80, alpha=0.5, vim=0, vmax=1)
+    fileString = render.draw_tile(grid, cmap='gray', dpi=80, alpha=0.5, vmin=0, vmax=1)
 
     assert textwrap.wrap(base64.b64encode(fileString), 80) == TILE

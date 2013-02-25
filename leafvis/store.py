@@ -71,11 +71,11 @@ class DataStore(object):
         """
         table = self.cache.get(grid_id)
         if table is not None:
-            node = table.getNode('/grids/{}'.format(grid_id))
-        except tables.NoSuchNodeError as error:
-            return None
-
-        return GridSample(node.name, node.lats[:,:], node.lons[:,:], node.values[:,:])
+            try:
+               node = table.getNode('/grids/{}'.format(grid_id))
+            except tables.NoSuchNodeError as error:
+                return None
+            return GridSample(node.name, node.lats[:,:], node.lons[:,:], node.values[:,:])
 
     # FIXME: Caching png data?
     def get_png(self, grid_id, bounding_box):
