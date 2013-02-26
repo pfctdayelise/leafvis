@@ -20,7 +20,7 @@
             attribution: ''
             });
 
-        var wmsLayer = L.tileLayer.wms("http://localhost:5000/", {
+        var wmsLayer = L.tileLayer.wms("http://{{ host }}:5000/", {
             layers: '{{ layer }}',
             format: 'image/png',
             transparent: true,
