@@ -2,27 +2,27 @@
 
 import requests
 import pickle
+import store
+
 from IPython.display import HTML
 
 
-def upload_data((lats, lons, values), host="http://localhost:5000/"):
-    """ Uploads the layer data onto the WMS datastore """
-    data = pickle.dumps((lats, lons, values))
-    payload = {'data': data}
-    r = requests.put(host, params=payload)
-    return r.content
-
-
-def leaflet(lats, lons, data):
+def leaflet(name, lats, lons, data, host="http://localhost:5000"):
     """ Returns a HTML leaflet view """
 
-    mapID = upload_data((lats, lons, data))
+    _id = store.create_wms_layer(name, lats, lons, data)
+    
+    # Tell the WMS server to refresh its grid cache.
+    r = requests.get('{}/grids/refresh'.format(host), params={})
+    
+    if r.content is None:
+        raise ValueError('Cannot update grids')
 
     url = ('<iframe '
-           ' src=http://localhost:5000/map/{}'
+           ' src={}/map/{}'
            ' width=850'
            ' height=650'
            '</iframe>'
-          ).format(mapID)
+          ).format(host, name)
     
     return HTML(url)

@@ -5,12 +5,12 @@ Resampling functions that map grids to tiles.
 import numpy as np
 from pyresample import geometry, image
 
-def resample((lats, lons, values), tl, br, samples=256):
+def resample(layer, tl, br, samples=256):
     """
     Returns a grid, which is resampled.
     """
 
-    data_grid = geometry.GridDefinition(lats=lats, lons=lons)
+    data_grid = geometry.GridDefinition(lats=layer.lats, lons=layer.lons)
     
     # Form the coordinates for resampling
     rlons = np.linspace(tl[0], br[0], 256)
@@ -23,7 +23,7 @@ def resample((lats, lons, values), tl, br, samples=256):
 
     # Build a resampler.
     resampler = image.ImageContainerNearest(
-        values, 
+        layer.values, 
         data_grid, 
         radius_of_influence=50000, 
         reduce_data=True

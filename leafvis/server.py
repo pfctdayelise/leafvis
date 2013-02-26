@@ -1,4 +1,3 @@
-
 import pickle
 import store
 import sampler
@@ -15,6 +14,8 @@ from tornado.ioloop import IOLoop
 app = Flask(__name__)
 
 memory = Memory(cachedir='/tmp/joblib', verbose=False)
+
+datastore = store.DataStore()
 
 @memory.cache
 def __drawLayerTile(layer_data, tl, br):
@@ -37,19 +38,17 @@ def wms():
 
     # Retrieve the layer of interest.
     layer = request.args['layers']
-    layer_data = store.retrieve_grid(layer)
+    layer_data = datastore.get_layer(layer)
 
     if layer_data is None:
         return ''
 
     return __drawLayerTile(layer_data, tl, br)  
 
-@app.route('/', methods=['PUT'])
-def upload():
-    layer_data = request.args['data']
-    layer = pickle.loads(layer_data)
-    layer_id = store.store_grid(*layer)
-    return str(layer_id)
+@app.route('/grids/<state>')
+def refresh(state):
+    if 'refresh' in state:
+        datastore.update()
 
 @app.route('/map/<layer>')
 def draw(layer):
@@ -59,3 +58,6 @@ if __name__ == '__main__':
     http_server = HTTPServer(WSGIContainer(app))
     http_server.listen(5000)
     IOLoop.instance().start()
+
+#if __name__ == '__main__':
+#    app.run(debug=True)

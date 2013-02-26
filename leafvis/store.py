@@ -15,39 +15,28 @@ BLOSC = tables.Filters(complib='blosc', complevel=5)
 
 Layer = collections.namedtuple('Layer', 'name lats lons values')
 
-################################################################################
-# TODO: 
-#    1. Cache of png data?
-#    2. GridSample representation?
-################################################################################
 
 def create_wms_layer(name, lats, lons, values):
     """ Create a wms layer """
 
-    grid_id = str(uuid.uuid4())
-
-    table = tables.openFile('{}/{}.hdf5'.format(GRID_LOCATION, grid_id), 'w')
+    with tables.openFile('{}/{}.hdf5'.format(GRID_LOCATION, name), 'w') as table:
     
-    # Form a unique grid entry
-    root = table.createGroup("/", 'grids', 'grid data')
+        # Form a unique grid entry
+        root = table.createGroup("/", 'grids', 'grid data')
 
-    grid_root = table.createGroup(root, str(grid_id), "grid_id")
+        grid_root = table.createGroup(root, name, "grid_id")
 
-    # For each entry form the table data.
-    for label, data in (('lats', lats), ('lons', lons), ('values', values)):
-        entry = table.createCArray(
-            grid_root, 
-            label, 
-            tables.Atom.from_dtype(data.dtype),
-            data.shape, 
-            filters=BLOSC)
-        entry[:] = data
+        # For each entry form the table data.
+        for label, data in (('lats', lats), ('lons', lons), ('values', values)):
+            entry = table.createCArray(
+                grid_root, 
+                label, 
+                tables.Atom.from_dtype(data.dtype),
+                data.shape, 
+                filters=BLOSC)
+            entry[:] = data
 
-    grid_root._v_attrs.name = name 
-
-    table.close()
-
-    return grid_id
+        grid_root._v_attrs.name = name 
 
 
 class DataStore(object):
@@ -55,8 +44,6 @@ class DataStore(object):
 
     def __init__(self):
         # Define the cache for {grid_id : table}
-        
-        self.map = {}
         self.cache = {}
 
     def __del__(self):
@@ -81,41 +68,30 @@ class DataStore(object):
             table = tables.openFile(filename, 'a')
 
             # Populate the cache
-            grid_id = table.listNodes('/grids')[0]._v_name
             name = table.listNodes('/grids')[0]._v_attrs.name
             
-            print "{} : {}".format(name, grid_id)
-
-            self.cache[grid_id] = table
-            self.map[name] = grid_id
-
-
+            self.cache[name] = table
+            
     def get_layer(self, name):
         """
         Retrieve a grid from the grid database
         """
 
-        grid_id = self.map.get(name)
+        table = self.cache.get(name)
 
-        if grid_id is not None:
+        if table is not None:
+            try:
+               node = table.getNode('/grids/{}'.format(name))
+            except tables.NoSuchNodeError as error:
+                return None
+            return Layer(
+                node._v_attrs.name, 
+                node.lats.read(), 
+                node.lons.read(), 
+                node.values.read()
+                )
 
-            table = self.cache.get(grid_id)
-
-            if table is not None:
-                try:
-                   node = table.getNode('/grids/{}'.format(grid_id))
-                except tables.NoSuchNodeError as error:
-                    return None
-                return Layer(
-                    node._v_attrs.name, 
-                    node.lats.read(), 
-                    node.lons.read(), 
-                    node.values.read()
-                    )
-
-    # FIXME: Caching png data?
-    def get_png(self, grid_id, bounding_box):
-        pass
+ 
 
 ################################################################################
 # FIXME: Delete code below
