@@ -9,19 +9,23 @@ import tables
 import collections
 import numpy as np
 
+# Form the leafvis cache.
 GRID_LOCATION = '/tmp/leafvis_grids'
+try:
+    os.mkdir(GRID_LOCATION)
+except OSError:
+    pass
 
-BLOSC = tables.Filters(complib='blosc', complevel=5)
 
 Layer = collections.namedtuple('Layer', 'name lats lons values')
 
-
-def create_wms_layer(name, lats, lons, values):
+def create_layer(name, lats, lons, values):
     """ Create a wms layer """
 
     with tables.openFile('{}/{}.hdf5'.format(GRID_LOCATION, name), 'w') as table:
     
         # Form a unique grid entry
+        _ = table.createGroup("/", 'png_cache', 'graphic cache')
         root = table.createGroup("/", 'grids', 'grid data')
 
         grid_root = table.createGroup(root, name, "grid_id")
@@ -33,7 +37,8 @@ def create_wms_layer(name, lats, lons, values):
                 label, 
                 tables.Atom.from_dtype(data.dtype),
                 data.shape, 
-                filters=BLOSC)
+                filters=tables.Filters(complib='blosc', complevel=5)
+                )
             entry[:] = data
 
         grid_root._v_attrs.name = name 
@@ -91,42 +96,29 @@ class DataStore(object):
                 node.values.read()
                 )
 
- 
+    ###########################################################################
 
-################################################################################
-# FIXME: Delete code below
-################################################################################
+    def get_png(self, name, tl, br):
+        """
+        Retrieve a grid from the grid database
+        """
+        img_id = 'img{}'.format(hash((tl, br))).replace('-','_')
 
-# Data store for raw grids 
-table = tables.openFile('/tmp/grids.hdf5', 'a')
+        table = self.cache.get(name)
+        if table is not None:
+            try:
+               node = table.getNode('/png_cache/{}'.format(img_id))
+            except tables.NoSuchNodeError as error:
+                return None
+            return node.png.read()
 
-def store_grid(lats, lons, values):
-    """ Stores a grid in a pytables datastore """
+    def store_png(self, name, tl, br, image_buffer):
+        """ 
+        Form an image cache.
+        """
+        img_id = 'img{}'.format(hash((tl, br))).replace('-','_')
+        table = self.cache.get(name)
+        root = table.getNode("/png_cache")
+        grid_root = table.createGroup(root, img_id, "png_id")
+        table.createArray(grid_root, 'png', image_buffer, "image")
 
-    try:
-        root = table.getNode('/grids')
-    except Exception as error:
-        root = table.createGroup("/", 'grids', 'grid data')
-
-    grid_id = uuid.uuid4()
-    grid_root = table.createGroup(root, str(grid_id), "grid_id")
-    
-    for label, data in (('lats', lats), ('lons', lons), ('values', values)):
-        entry = table.createCArray(
-            grid_root, 
-            label, 
-            tables.Atom.from_dtype(data.dtype),
-            data.shape, 
-            filters=BLOSC)
-
-        entry[:] = data
-    return grid_id
-
-
-def retrieve_grid(grid_id):
-    """ Retrieve a grid from the grid database """
-    try:
-        node = table.getNode('/grids/{}'.format(grid_id))
-    except tables.NoSuchNodeError as error:
-        return None
-    return (node.lats[:,:], node.lons[:,:], node.values[:,:])
