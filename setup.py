@@ -41,7 +41,8 @@ setup(
     version=VERSION,
     classifiers=CLASSIFIERS,
     packages=find_packages(),
-    package_data={},
+    package_data={'leafvis': ['colortables/*.cpt', 'templates/*.html']},
+    entry_points={'console_scripts': ['leafvis-server = leafvis.server:main']},
     install_requires=[
        'flask',
        'numpy',
