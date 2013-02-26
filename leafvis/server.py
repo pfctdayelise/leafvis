@@ -51,7 +51,7 @@ def refresh(state):
     if 'refresh' in state:
         datastore.update()
 
-@app.route('/map/<layer>')
+@app.route('/map/<layer>/<cmap>')
 def draw(layer):
     return render_template('leaflet.html', layer=layer)
 

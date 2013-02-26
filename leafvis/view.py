@@ -7,10 +7,10 @@ import store
 from IPython.display import HTML
 
 
-def leaflet(name, lats, lons, data, host="http://localhost:5000"):
+def leaflet(layer, host="http://localhost:5000"):
     """ Returns a HTML leaflet view """
 
-    _ = store.create_layer(name, lats, lons, data)
+    _ = store.create_layer(layer)
     
     # Tell the WMS server to refresh its grid cache.
     r = requests.get('{}/grids/refresh'.format(host), params={})
@@ -23,6 +23,6 @@ def leaflet(name, lats, lons, data, host="http://localhost:5000"):
            ' width=850'
            ' height=650'
            '</iframe>'
-          ).format(host, name)
+          ).format(host, layer.name)
     
     return HTML(url)

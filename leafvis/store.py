@@ -19,19 +19,19 @@ except OSError:
 
 Layer = collections.namedtuple('Layer', 'name lats lons values')
 
-def create_layer(name, lats, lons, values):
+def create_layer(layer):
     """ Create a wms layer """
 
-    with tables.openFile('{}/{}.hdf5'.format(GRID_LOCATION, name), 'w') as table:
+    with tables.openFile('{}/{}.hdf5'.format(GRID_LOCATION, layer.name), 'w') as table:
     
         # Form a unique grid entry
         _ = table.createGroup("/", 'png_cache', 'graphic cache')
         root = table.createGroup("/", 'grids', 'grid data')
 
-        grid_root = table.createGroup(root, name, "grid_id")
+        grid_root = table.createGroup(root, layer.name, "grid_id")
 
         # For each entry form the table data.
-        for label, data in (('lats', lats), ('lons', lons), ('values', values)):
+        for label, data in (('lats', layer.lats), ('lons', layer.lons), ('values', layer.values)):
             entry = table.createCArray(
                 grid_root, 
                 label, 
@@ -41,7 +41,7 @@ def create_layer(name, lats, lons, values):
                 )
             entry[:] = data
 
-        grid_root._v_attrs.name = name 
+        grid_root._v_attrs.name = layer.name 
 
 
 class DataStore(object):
