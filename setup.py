@@ -45,6 +45,8 @@ setup(
     entry_points={'console_scripts': ['leafvis-server = leafvis.server:main']},
     install_requires=[
        'flask',
+       'requests',
+       'tables',
        'numpy',
        'joblib',
        'pyproj',
