@@ -58,7 +58,7 @@ def refresh(state):
 
 @app.route('/map/<layer>/<cmap>/<vmin>/<vmax>')
 def draw(layer, cmap, vmin, vmax):
-    TILECOLORS[layer] = (cmap, vmin, vmax)
+    TILECOLORS[layer] = (cmap, float(vmin), float(vmax))
     return render_template('leaflet.html', layer=layer)
 
 if __name__ == '__main__': 

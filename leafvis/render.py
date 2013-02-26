@@ -14,7 +14,7 @@ COLORMAPS = {
     'elevation': colormaps.elevation
     }
 
-def draw_tile(grid, cmap, vmin, vmax, dpi=80, alpha=0.5):
+def draw_tile(grid, cmap, vmin, vmax, dpi=75, alpha=0.75):
     """ Draws a tile """
 
     fig = Figure(dpi=dpi, edgecolor='none')
