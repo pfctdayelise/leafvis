@@ -14,16 +14,21 @@ app = Flask(__name__)
 
 datastore = store.DataStore()
 
+TILECOLORS = {}
+
+
 def _drawLayerTile(name, tl, br):
     
     png = datastore.get_png(name, tl, br)
+
+    cmap, vmin, vmax = TILECOLORS.get(name, ('elevation', 0, 1200))
 
     if png is None:
         layer = datastore.get_layer(name)
         if layer is None:
             return ''
         grid = sampler.resample(layer, tl, br, samples=256)       
-        png = render.draw_tile(grid)
+        png = render.draw_tile(grid, cmap, vmin, vmax)
         datastore.store_png(name, tl, br, png)
     return png
 
@@ -51,8 +56,9 @@ def refresh(state):
     if 'refresh' in state:
         datastore.update()
 
-@app.route('/map/<layer>/<cmap>')
-def draw(layer):
+@app.route('/map/<layer>/<cmap>/<vmin>/<vmax>')
+def draw(layer, cmap, vmin, vmax):
+    TILECOLORS[layer] = (cmap, vmin, vmax)
     return render_template('leaflet.html', layer=layer)
 
 if __name__ == '__main__': 

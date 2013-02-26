@@ -7,7 +7,7 @@ import store
 from IPython.display import HTML
 
 
-def leaflet(layer, host="http://localhost:5000"):
+def leaflet(layer, cmap='elevation', vmin=0, vmax=1200, host="http://localhost:5000"):
     """ Returns a HTML leaflet view """
 
     _ = store.create_layer(layer)
@@ -19,10 +19,10 @@ def leaflet(layer, host="http://localhost:5000"):
         raise ValueError('Cannot update grids')
 
     url = ('<iframe '
-           ' src={}/map/{}'
+           ' src={}/map/{}/{}/{}/{}'
            ' width=850'
            ' height=650'
            '</iframe>'
-          ).format(host, layer.name)
+          ).format(host, layer.name, cmap, vmin, vmax)
     
     return HTML(url)
