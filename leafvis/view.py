@@ -25,6 +25,4 @@ def leaflet(layer, cmap='elevation', vmin=0, vmax=1200, host="localhost"):
            '</iframe>'
           ).format(host, layer.name, cmap, vmin, vmax)
 
-    print url
-
     return HTML(url)
