@@ -13,7 +13,8 @@
     <div id="map" style="width:800px; height: 600px"></div>
 
     <script src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
-    <script>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script type="text/javascript">
 
         var baseMap = L.tileLayer('http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png', {
             maxZoom: 11,
@@ -30,7 +31,6 @@
             center: new L.LatLng(-30.2, 135.0),
             zoom: 4,
             layers: [baseMap, wmsLayer],
-            crs: L.CRS.EPSG3857
             });
 
         var popup = L.popup();
@@ -48,8 +48,8 @@
 
         function getSample(latlng) {
             
-            var server = 'http://127.0.0.1:5000/';
-            var url = server + 'sample/' + latlng.lat + ',' + latlng.lng + '?callback=?';
+            var server = 'http://{{ host }}:5000/';
+            var url = server + 'sample/{{ layer }}/' + latlng.lat + '/' + latlng.lng + '?callback=?';
             
             $.getJSON(url, function (data) {
                 popup.setContent(data.value);
