@@ -20,8 +20,8 @@ def leaflet(layer, cmap='elevation', vmin=0, vmax=1200, host="localhost"):
 
     url = ('<iframe '
             ' src=http://{}:5000/map/{}/{}/{}/{}'
-           ' width=850'
-           ' height=650'
+           ' width=500'
+           ' height=500'
            '</iframe>'
           ).format(host, layer.name, cmap, vmin, vmax)
 

@@ -25,7 +25,7 @@ def resample(layer, tl, br, samples=256):
     resampler = image.ImageContainerNearest(
         layer.values, 
         data_grid, 
-        radius_of_influence=50000, 
+        radius_of_influence=6500, 
         reduce_data=True
         )
 
@@ -34,3 +34,27 @@ def resample(layer, tl, br, samples=256):
     grid[grid == 0] = np.nan
 
     return grid
+
+
+def sample_latlon(layer, lat, lon):
+    """
+    Returns a float which is a value grid, which is resampled.
+    """
+
+    data_grid = geometry.GridDefinition(lats=layer.lats, lons=layer.lons)
+    
+    resampler = image.ImageContainerNearest(
+        layer.values, 
+        data_grid, 
+        radius_of_influence=6500, 
+        reduce_data=False
+        )
+
+    resample_grid = geometry.GridDefinition(
+        lats=np.ones((1, 1)) * lat, 
+        lons=np.ones((1, 1)) * lon)
+
+    # Form the appropriate grid.
+    grid = resampler.resample(resample_grid).image_data
+    return float(grid[0][0])
+

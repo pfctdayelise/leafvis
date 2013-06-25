@@ -41,18 +41,19 @@
                 .setContent(e.latlng.toString())
                 .openOn(map);
         
-            getSample(e.latlng)
+            getSample(e.latlng);
         }
 
         map.on('click', onMapClick);
 
         function getSample(latlng) {
-            
             var server = 'http://{{ host }}:5000/';
             var url = server + 'sample/{{ layer }}/' + latlng.lat + '/' + latlng.lng + '?callback=?';
             
             $.getJSON(url, function (data) {
-                popup.setContent(data.value);
+		var content = latlng.toString();
+		content += '<br/>Value: ' + data.sample.toFixed(2);
+                popup.setContent(content);
                 })
 
             }
