@@ -70,8 +70,8 @@ def wms():
 @app.route('/grids/<state>')
 def refresh(state):
     if 'refresh' in state:
-        print "Refreshing"
         datastore.update()
+    return jsonify(result=True)
 
 
 @app.route('/map/<layer>/<cmap>/<vmin>/<vmax>')

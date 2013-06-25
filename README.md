@@ -32,6 +32,20 @@ The required dependencies to build the software are:
   - matplotlib
   - pyresample
   - py.test
+  - Cython
+  - Jinja2
+  - MarkupSafe
+  - Werkzeug
+  - configobj
+  - itsdangerous
+  - joblib
+  - numexpr
+  - requests
+  - tables
+  - wsgiref
+  - tornado
+  - pyzmq
+  - ipython!
 
 Install
 -------

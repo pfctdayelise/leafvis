@@ -14,7 +14,6 @@ def leaflet(layer, cmap='elevation', vmin=0, vmax=1200, host="localhost"):
 
     # Tell the WMS server to refresh its grid cache.
     r = requests.get('http://{}:5000/grids/refresh'.format(host), params={})
-
     if r.content is None:
         raise ValueError('Cannot update grids')
 
